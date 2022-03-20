@@ -7,8 +7,6 @@ import NavBar from "./navbar";
 // import chatConent from "./ChatContent"
 import ChatContent from "./ChatContent";
 
-
-
 const useStyles = makeStyles((theme) => ({
   fab: {
     position: "fixed",
@@ -21,9 +19,10 @@ function Chat(props) {
   const classes = useStyles();
   return (
     <div>
-        <NavBar/>
+      <NavBar />
       <h2>this is the auth authenticated page routes</h2>
-        <ChatContent></ChatContent>
+      <ChatContent chatting={props.web}></ChatContent>
+      {console.log("chat component", props.web)}
     </div>
   );
 }
