@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { toggleauthdialog , logoutuser} from "../action/user";
+import { toggleauthdialog, logoutuser } from "../action/user";
 import { Button } from "@material-ui/core";
 import { alpha, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -225,7 +225,7 @@ function NavBar(props) {
             />
           </div>
 
-          {props.authstate  ? (
+          {props.authstate ? (
             <>
               <div className={classes.grow} />
               <div className={classes.sectionDesktop}>
@@ -301,6 +301,6 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ toggleauthdialog , logoutuser }, dispatch);
+  return bindActionCreators({ toggleauthdialog, logoutuser }, dispatch);
 };
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar);

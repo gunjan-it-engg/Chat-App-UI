@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { bindActionCreators } from "redux";
 import TextField from "@mui/material/TextField";
 import { connect } from "react-redux";
-import { chatstart } from "../action/user";
+import {
+  chatstart,
+  Chatting,
+  CreateGroup,
+  toggleauthdialog,
+  Getlist,
+} from "../action/user";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -12,6 +18,9 @@ import Typography from "@material-ui/core/Typography";
 import SendIcon from "@mui/icons-material/Send";
 import ChatIcon from "@mui/icons-material/Chat";
 import socketIOClient, { io } from "socket.io-client";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import Groupdialog from "./createGroupdialog";
+import NotificationImportantIcon from "@mui/icons-material/NotificationImportant";
 
 // import Covidcases from "../animationComponent/covidcases";
 // import AnimatedNumber from "animated-number-react";
@@ -32,7 +41,7 @@ const ENDPOINT = "http://localhost:4000";
 
 const useStyles = makeStyles((theme) => ({
   buttom: {
-    marginTop: theme.spacing(62),
+    // marginTop: theme.spacing(62),
     // position:"fixed",
     // marginBottom:"1px",
     // marginTop:"20px"
@@ -71,12 +80,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let arr = [];
 function SimpleCard(props) {
   let socket = props.chatting;
   // console.log("props check", props.name);
   const [response, setResponse] = useState([]);
   const [newone, setNewone] = useState("");
   const [chat, setChat] = useState("");
+  const [talk, setTalk] = useState("");
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState([""]);
+  const [displaymsg, setDisplay] = useState("");
+  const [left, setleft] = useState("");
   useEffect(() => {
     // const socket = socketIOClient(ENDPOINT);
     // const socket = socketIOClient(ENDPOINT, {
@@ -86,7 +101,15 @@ function SimpleCard(props) {
     function Chatcall() {
       socket.emit();
     }
+
+    socket.on("chattingMessage", (dataMessage) => {
+      console.log("chat message get", dataMessage);
+      setDisplay(dataMessage);
+      arr.push({ message: dataMessage });
+    });
     socket.on("recive", (dataa) => {
+      console.log(dataa);
+      // arr = dataa;
       setResponse(dataa);
     });
     socket.on("connectedUsersCount", (datas) => {
@@ -94,6 +117,9 @@ function SimpleCard(props) {
     });
     socket.on("chating", (data) => {
       setChat(data);
+    });
+    socket.on("left", (datam) => {
+      setleft(datam);
     });
   }, []);
   const user = {
@@ -117,9 +143,9 @@ function SimpleCard(props) {
   const { items } = user;
   const { room } = rooms;
 
-  //   useEffect(() => {
-  //     return props.getCoviddata();
-  //   }, []);
+  useEffect(() => {
+    return props.Getlist();
+  }, []);
   const formatValue = (value) => value.toFixed();
 
   const bull = <span className={classes.bullet}>•</span>;
@@ -131,7 +157,7 @@ function SimpleCard(props) {
       {/* {console.log("props drilling", props.name)} */}
       <Card
         className={classes.root}
-        style={{ backgroundColor: "#bfe4f6ba" }}
+        style={{ backgroundColor: "#bfe4f6ba", overflow: "auto" }}
         variant="outlined"
       >
         <CardContent>
@@ -152,24 +178,46 @@ function SimpleCard(props) {
                   margin: "5px",
                 }}
               >
-                <div>{item.id}</div>
+                <div>{item.name}</div>
                 <div style={{ marginLeft: "5px" }}>
                   <Button
                     onClick={() => props.chatstart(item.id)}
                     variant="outlined"
                   >
+                    <HandshakeOutlinedIcon></HandshakeOutlinedIcon>
+                  </Button>
+                  <Button onClick={() => setTalk(item.id)} variant="outlined">
                     <ChatIcon />
+                  </Button>
+                  <Button onClick={() => setName(item.name)} variant="outlined">
+                    go
                   </Button>
                 </div>
               </div>
             ))}
           </div>
         </CardContent>
+        <div style={{}}>
+          <p
+            style={{
+              border: "2px solid",
+              alignContent: "center",
+              marginLeft: "5%",
+              border: "2 px solid red",
+            }}
+          >
+            {left ? <NotificationImportantIcon /> : ""}
+            {left}
+          </p>
+        </div>
         <CardActions></CardActions>
       </Card>
       <Card
         className={classes.root}
-        style={{ backgroundColor: "rgb(191 246 191 / 73%)" }}
+        style={{
+          backgroundColor: "rgb(191 246 191 / 73%)",
+          overflow: "auto",
+        }}
         variant="outlined"
       >
         <CardContent>
@@ -178,9 +226,13 @@ function SimpleCard(props) {
             color="textSecondary"
             gutterBottom
           >
-            Chat with user
+            Chat with {name ? name : "user__?"}
           </Typography>
           <Typography>{chat}</Typography>
+          {/* <Typography>{displaymsg}</Typography> */}
+          {arr.map((elment) => (
+            <Typography>{elment.message}</Typography>
+          ))}
         </CardContent>
         <CardActions
           className={classes.buttom}
@@ -188,21 +240,38 @@ function SimpleCard(props) {
             justifyContent: "center",
             alignItems: "center",
             display: "flex",
+            // bottom: "10px",
+            // left: "50px",
+            // right: "50px",
+            // position: "absolute",
+            // position: "fixed",
           }}
         >
-          <div style={{ position: "sticky" }}>
-            <TextField
-              style={{ width: "350px" }}
-              id="outlined-basic"
-              label="Chat"
-              variant="outlined"
-            />
-            <Button
-              style={{ width: "60px", height: "55px" }}
-              variant="outlined"
-            >
-              <SendIcon />
-            </Button>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "50px",
+              left: "50",
+              right: "50",
+            }}
+          >
+            {console.log("talk check", talk)}
+            <form>
+              <TextField
+                onChange={(e) => setMessage(e.target.value)}
+                style={{ width: "350px" }}
+                id="outlined-basic"
+                label="Chat"
+                variant="outlined"
+              />
+              <Button
+                style={{ width: "60px", height: "55px" }}
+                variant="outlined"
+                onClick={() => props.Chatting(talk, message)}
+              >
+                <SendIcon />
+              </Button>
+            </form>
           </div>
         </CardActions>
       </Card>
@@ -210,6 +279,7 @@ function SimpleCard(props) {
         className={classes.root}
         style={{
           backgroundColor: "rgb(247 207 197 / 73%)",
+          overflow: "auto",
         }}
         variant="outlined"
       >
@@ -221,8 +291,12 @@ function SimpleCard(props) {
           >
             Rooms
           </Typography>
+          <Groupdialog />
           <div style={{ margin: "2px" }}>
-            {room.map((item) => (
+            <Button variant="outlined" onClick={() => props.toggleauthdialog()}>
+              +
+            </Button>
+            {props.groupslist?.map((item) => (
               <div
                 style={{
                   justifyContent: "center",
@@ -231,7 +305,8 @@ function SimpleCard(props) {
                   margin: "5px",
                 }}
               >
-                <div>{item.title}</div>
+                <div>{item.name}</div>
+                {console.log("grouplist", item)}
                 <div style={{ marginLeft: "5px" }}>
                   <Button variant="outlined">
                     <ChatIcon />
@@ -252,6 +327,7 @@ function SimpleCard(props) {
 const mapStateToProps = (state) => {
   return {
     authstate: state.auth?.isloggedin,
+    groupslist: state.auth?.groupdata,
   };
 };
 
@@ -259,6 +335,10 @@ const mapDispatchToProps = (dispatch) => {
   return bindActionCreators(
     {
       chatstart,
+      Chatting,
+      CreateGroup,
+      toggleauthdialog,
+      Getlist,
     },
     dispatch
   );
